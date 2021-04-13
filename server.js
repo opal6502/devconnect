@@ -1,7 +1,14 @@
 'use strict';
 
+console.log('starting up!');
+
 const express = require('express');
 const app = express();
+
+const bodyParser = require('body-parser');
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 const mongoose = require('mongoose');
 const db = require('./config/keys').mongoURI;
@@ -16,9 +23,14 @@ mongoose
   .then(() => console.log('MongoDB connected.'))
   .catch((err) => console.log('MongoDB connect failed: ', err));
 
-const port = process.env.PORT || 5000; // process.env.PORT on Heroku
+const passport = require('passport');
 
-app.get('/', (req, res) => res.send('Hello from devconnector'));
+app.use(passport.initialize);
+
+// Passport Config
+require('./config/passport')(passport);
+
+const port = process.env.PORT || 5000; // process.env.PORT on Heroku
 
 // API routes:
 app.use('/api/users', users);
