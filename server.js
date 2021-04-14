@@ -3,34 +3,35 @@
 console.log('starting up!');
 
 const express = require('express');
-const app = express();
-
 const bodyParser = require('body-parser');
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
 const mongoose = require('mongoose');
+const passport = require('passport');
+
+// Server port:
+const port = process.env.PORT || 5000; // process.env.PORT on Heroku
+
+// Connect to MongoDB:
 const db = require('./config/keys').mongoURI;
-
-// import route files:
-const users = require('./routes/api/users');
-const profile = require('./routes/api/profile');
-const posts = require('./routes/api/posts');
-
 mongoose
   .connect(db)
   .then(() => console.log('MongoDB connected.'))
   .catch((err) => console.log('MongoDB connect failed: ', err));
 
-const passport = require('passport');
+// Init express:
+const app = express();
 
-app.use(passport.initialize);
+// Add JSON body parser middleware:
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-// Passport Config
+// Init passport:
+app.use(passport.initialize());
 require('./config/passport')(passport);
 
-const port = process.env.PORT || 5000; // process.env.PORT on Heroku
+// import route files:
+const users = require('./routes/api/users');
+const profile = require('./routes/api/profile');
+const posts = require('./routes/api/posts');
 
 // API routes:
 app.use('/api/users', users);

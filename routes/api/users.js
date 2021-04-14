@@ -6,6 +6,10 @@ const jwt = require('jsonwebtoken');
 const keys = require('../../config/keys');
 const passport = require('passport');
 
+// load input validation:
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
+
 // Load User model
 const User = require('../../models/User');
 
@@ -20,7 +24,11 @@ router.get('/test', (req, res) =>
 // @desc Register new user
 // @access Public
 router.post('/register', (req, res) => {
-  console.log('In register route!');
+  const { errors, isValid } = validateRegisterInput(req.body);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   const avatar = gravatar.url(req.body.email, {
     s: '200', // image size
     r: 'pg', // Rating
@@ -57,28 +65,34 @@ router.post('/register', (req, res) => {
 // @desc Login User / Generate token
 // @access Public
 router.post('/login', (req, res) => {
+  const { errors, isValid } = validateLoginInput(req.body);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   const email = req.body.email;
   const password = req.body.password;
 
   // Find user by email:
   User.findOne({ email }).then((user) => {
     if (!user) {
-      return res.status(404).json({ email: 'User with that email not found' });
+      errors.email = 'User with that email not found';
+      return res.status(404).json(errors);
     }
 
     // check password
     bcrypt.compare(password, user.password).then((isMatch) => {
       if (isMatch) {
         // user authenticated, sign token
-        const jwt_payload = {
+        const payload = {
           id: user.id,
           name: user.name,
           avatar: user.avatar,
         };
 
         jwt.sign(
-          jwt_payload,
-          keys.secretKey,
+          payload,
+          keys.secretOrKey,
           { expiresIn: 3600 },
           (err, token) => {
             res.json({
@@ -88,7 +102,8 @@ router.post('/login', (req, res) => {
           }
         );
       } else {
-        return res.status(400).json({ password: 'Password incorrect' });
+        errors.password = 'Password incorrect';
+        return res.status(400).json(errors);
       }
     });
   });
@@ -99,9 +114,13 @@ router.post('/login', (req, res) => {
 // @access Private
 router.get(
   '/current',
-  passport.authenticate('jwt', { session: 'false' }),
+  passport.authenticate('jwt', { session: false }),
   (req, res) => {
-    res.json({ message: 'Success' });
+    res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email,
+    });
   }
 );
 
