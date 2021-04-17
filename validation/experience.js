@@ -8,6 +8,7 @@ module.exports = function validateExperienceInput(data) {
   data.title = !isEmpty(data.title) ? data.title : '';
   data.company = !isEmpty(data.company) ? data.company : '';
   data.from = !isEmpty(data.from) ? data.from : '';
+  data.to = !isEmpty(data.to) ? data.to : '';
 
   if (Validator.isEmpty(data.title)) {
     errors.title = 'Job title field is required';
@@ -21,6 +22,15 @@ module.exports = function validateExperienceInput(data) {
   }
   if (Validator.isEmpty(data.from)) {
     errors.from = 'From date field is required';
+  }
+
+  if (!data.current) {
+    if (!Validator.isDate(data.to)) {
+      errors.from = 'To date field not correctly formatted';
+    }
+    if (Validator.isEmpty(data.to)) {
+      errors.from = 'To date field is required';
+    }
   }
 
   return {
