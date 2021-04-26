@@ -53,7 +53,15 @@ router.post('/register', (req, res) => {
           newUser.password = hash;
           newUser
             .save()
-            .then((user) => res.json(user))
+            .then((user) => {
+              // make a duplicate without password hash:
+              const userResponse = {
+                name: user.name,
+                email: user.email,
+                avatar: user.avatar,
+              };
+              res.json(userResponse);
+            })
             .catch((err) => res.json({ message: "Couldn't create user" }));
         });
       });
