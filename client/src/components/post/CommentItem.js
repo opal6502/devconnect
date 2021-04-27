@@ -12,9 +12,6 @@ class CommentItem extends Component {
   render() {
     const { comment, postId, auth } = this.props;
 
-    console.log('comment.user = ', comment.user);
-    console.log('auth.user.id = ', auth.user.id);
-
     return (
       <div className='card card-body mb-3'>
         <div className='row'>
@@ -37,7 +34,7 @@ class CommentItem extends Component {
                 type='button'
                 className='btn btn-danger mr-1'
               >
-                <i className='fas fa-times' /> DELETE
+                <i className='fas fa-times' />
               </button>
             ) : (
               ''
